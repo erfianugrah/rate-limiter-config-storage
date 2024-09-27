@@ -130,6 +130,8 @@ export class ConfigStorage {
       );
       console.log(`Versions saved for rule ${rule.id}`);
 
+      await this.pushConfigUpdate();
+
       return new Response(JSON.stringify(rule), {
         status: 200,
         headers: { "Content-Type": "application/json" },
@@ -403,6 +405,8 @@ export class ConfigStorage {
 
         console.log("Rule update complete");
 
+        await this.pushConfigUpdate();
+
         return new Response(
           JSON.stringify({ message: "Rule updated", rule: newRule }),
           {
@@ -452,6 +456,8 @@ export class ConfigStorage {
         await this.state.storage.delete(`versions_${ruleId}`);
         console.log(`Versions for rule ${ruleId} deleted`);
 
+        await this.pushConfigUpdate();
+
         return new Response(JSON.stringify({ message: "Rule deleted" }), {
           status: 200,
           headers: { "Content-Type": "application/json" },
@@ -499,6 +505,8 @@ export class ConfigStorage {
 
       await this.state.storage.put("rules", JSON.stringify(reorderedRules));
       console.log("Reordered rules saved to storage");
+
+      await this.pushConfigUpdate();
 
       return new Response(
         JSON.stringify({ message: "Rules reordered", rules: reorderedRules }),
@@ -597,6 +605,8 @@ export class ConfigStorage {
       );
       console.log("Updated versions saved to storage");
 
+      await this.pushConfigUpdate();
+
       return new Response(
         JSON.stringify({ message: "Rule reverted", rule: revertedRule }),
         {
@@ -616,6 +626,19 @@ export class ConfigStorage {
           headers: { "Content-Type": "application/json" },
         },
       );
+    }
+  }
+
+  async pushConfigUpdate() {
+    try {
+      const config = await this.getConfig();
+      await this.env.CONFIG_QUEUE.send({
+        type: "config_update",
+        version: config.version, // Assuming you have a version field in your config
+      });
+      console.log("Config update notification pushed to queue");
+    } catch (error) {
+      console.error("Error pushing config update notification:", error);
     }
   }
 
