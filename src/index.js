@@ -1,7 +1,7 @@
 export { ConfigStorage } from "./config-storage.js";
 
 export default {
-  async fetch(request, env) {
+  fetch(request, env) {
     const configStorageId = env.CONFIG_STORAGE.idFromName("global");
     const configStorage = env.CONFIG_STORAGE.get(configStorageId);
 
