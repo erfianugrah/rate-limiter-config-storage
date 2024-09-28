@@ -1,7 +1,7 @@
 # Rate Limiter Config Storage
 
 ## Table of Contents
-1. [Project Overview](#project-overview)
+1. [Overview](#overview)
 2. [Project Structure](#project-structure)
 3. [System Architecture](#system-architecture)
 4. [Key Components](#key-components)
@@ -11,19 +11,16 @@
 8. [Development](#development)
 9. [Deployment](#deployment)
 10. [Future Enhancements](#future-enhancements)
+11. [Related Components](#related-components)
 
-## Project Overview
+## Overview
 
-This project implements a configuration storage system for a rate-limiting service using Cloudflare Workers and Durable Objects. It provides a RESTful API for managing rate-limiting rules, which can be applied to various endpoints or zones in a Cloudflare environment.
-
-The system consists of two main components:
-1. **Config Storage Worker**: Manages the storage and retrieval of rate-limiting rules.
-2. **Rate Limiting Worker**: Applies the rate-limiting rules to incoming requests (not included in this codebase).
+The Rate Limiter Config Storage is a Cloudflare Worker that implements a configuration storage system for a rate-limiting service. It provides a RESTful API for managing rate-limiting rules, which can be applied to various endpoints or zones in a Cloudflare environment.
 
 ## Project Structure
 
 ```
-.
+rate-limiter-config-storage/
 ├── src/
 │   ├── index.js
 │   ├── config-storage.js
@@ -53,7 +50,8 @@ graph TD
     C -->|Store/Retrieve| D[(Durable Object Storage)]
     B -->|Push Updates| E[Config Update Queue]
     F[Rate Limiting Worker] -->|Fetch Config| B
-    F -->|Apply Rules| G[User's Origin]
+    G[Rate Limiter UI] -->|Manage Rules| B
+    F -->|Apply Rules| H[User's Origin]
 ```
 
 ## Key Components
@@ -151,17 +149,23 @@ new_classes = ["ConfigStorage"]
 
 ## Development
 
-1. Install dependencies:
+1. Clone the repository:
+   ```
+   git clone https://github.com/erfianugrah/rate-limiter-config-storage.git
+   cd rate-limiter-config-storage
+   ```
+
+2. Install dependencies:
    ```
    npm install
    ```
 
-2. Run the development server:
+3. Run the development server:
    ```
    npm run dev
    ```
 
-3. Test the API endpoints using tools like cURL or Postman.
+4. Test the API endpoints using tools like cURL or Postman.
 
 ## Deployment
 
@@ -173,11 +177,17 @@ npm run deploy
 
 ## Future Enhancements
 
-As mentioned in the OpenAPI specification:
-
 1. Implement authentication for the configuration API.
 2. Add support for more complex rate limiting scenarios.
 3. Implement caching mechanisms to reduce Durable Object reads.
 4. Add support for importing and exporting rule configurations.
-5. Develop a user interface for easier management of rate limiting rules.
-6. Implement analytics and reporting features for rate limiting activities.
+5. Implement analytics and reporting features for rate limiting activities.
+
+## Related Components
+
+This Config Storage Worker is part of a larger rate limiting system. The other components are:
+
+1. [Rate Limiter UI](https://github.com/erfianugrah/rate-limiter-ui): Provides a user interface for managing rate limiting rules.
+2. [Rate Limiting Worker](https://github.com/erfianugrah/rate-limiter-worker): Applies the rate limiting rules to incoming requests.
+
+For a complete setup, ensure all components are properly configured and deployed.
