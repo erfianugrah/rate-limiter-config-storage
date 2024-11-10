@@ -91,7 +91,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /config/rules/{ruleId}:
+  /rules/{ruleId}:
     put:
       summary: Update an existing rate limiting rule
       description: |
@@ -250,7 +250,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /config/rules/{ruleId}/revert:
+  /rules/{ruleId}/revert:
     put:
       summary: Revert a rule to a previous version
       description: |
@@ -301,7 +301,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /config/rules/{ruleId}/versions:
+  /rules/{ruleId}/versions:
     get:
       summary: Get version history for a rule
       description: Retrieves the version history of a specific rule.
