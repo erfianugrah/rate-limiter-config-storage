@@ -316,6 +316,59 @@ class RateLimiterApiSimulator:
                 print(f"{Fore.RED}Response: {e.response.text}")
         return False
 
+    def revert_rule(self, rule_id: str, target_version: int) -> bool:
+        """Revert a rule to a specific version."""
+        try:
+            response = requests.put(
+                f"{self.base_url}/rules/{rule_id}/revert",
+                json={"targetVersion": target_version},
+                headers=self.get_headers()
+            )
+            response.raise_for_status()
+            result = response.json()
+            print(f"{Fore.GREEN}Reverted rule {rule_id} to version {target_version}")
+            print(f"{Fore.YELLOW}Response: {json.dumps(result, indent=2)}")
+            return True
+        except requests.exceptions.RequestException as e:
+            print(f"{Fore.RED}Error reverting rule: {str(e)}")
+            if hasattr(e.response, 'text'):
+                print(f"{Fore.RED}Response: {e.response.text}")
+            return False
+
+    def get_rule_versions(self, rule_id: str) -> Optional[List[dict]]:
+        """Get version history for a specific rule."""
+        try:
+            response = requests.get(
+                f"{self.base_url}/rules/{rule_id}/versions",
+                headers=self.get_headers()
+            )
+            response.raise_for_status()
+            versions = response.json().get('versions', [])
+            print(f"{Fore.GREEN}Retrieved {len(versions)} versions for rule {rule_id}")
+            return versions
+        except requests.exceptions.RequestException as e:
+            print(f"{Fore.RED}Error getting rule versions: {str(e)}")
+            if hasattr(e.response, 'text'):
+                print(f"{Fore.RED}Response: {e.response.text}")
+            return None
+
+    def get_specific_rule(self, rule_id: str) -> Optional[dict]:
+        """Get a specific rule by ID."""
+        try:
+            response = requests.get(
+                f"{self.base_url}/rules/{rule_id}",
+                headers=self.get_headers()
+            )
+            response.raise_for_status()
+            rule = response.json()
+            print(f"{Fore.GREEN}Retrieved rule: {rule_id}")
+            return rule
+        except requests.exceptions.RequestException as e:
+            print(f"{Fore.RED}Error getting rule: {str(e)}")
+            if hasattr(e.response, 'text'):
+                print(f"{Fore.RED}Response: {e.response.text}")
+            return None
+
     def cleanup_session(self, session_id: Optional[str] = None) -> None:
         """Clean up rules created in a session with thread safety."""
         with self.session_lock:
@@ -349,7 +402,7 @@ class RateLimiterApiSimulator:
 
         for session_id in session_ids:
             self.cleanup_session(session_id)
-        
+
         print(f"{Fore.GREEN}All sessions cleaned up")
 
     def get_session_info(self, session_id: Optional[str] = None) -> None:
@@ -387,12 +440,21 @@ def run_session_loop(
         rule_id = simulator.create_rule(rule_data)
 
         if rule_id:
+            # Get specific rule
+            rule = simulator.get_specific_rule(rule_id)
+
             # Wait a bit before updating
             time.sleep(random.uniform(*interval))
 
             # Update the rule
             update_data = create_test_rule_update(rule_id, rule_data["order"])
             simulator.update_rule(rule_id, update_data)
+
+            # Get version history
+            versions = simulator.get_rule_versions(rule_id)
+            if versions and len(versions) > 0:
+                # Try reverting to first version
+                simulator.revert_rule(rule_id, versions[0]['version'])
 
             # Get current rules and attempt reordering
             current_rules = simulator.get_rules()
