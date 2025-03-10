@@ -180,7 +180,9 @@ function validateCondition(
     'not_contains': 'notContains',
     'starts_with': 'startsWith',
     'ends_with': 'endsWith',
-    'matches': 'matches'
+    'matches': 'matches',
+    'exists': 'exists',
+    'not_exists': 'notExists'
   };
   
   // Allow both long form and short form operators
@@ -196,7 +198,7 @@ function validateCondition(
   }
   
   if (condition.operator && !validOperators.includes(normalizedOperator)) {
-    result.addError(`${path}[${index}].operator`, `Invalid operator: ${condition.operator}. Must be one of: ${validOperators.join(', ')} or their short forms (eq, ne, gt, ge, lt, le, contains, not_contains, starts_with, ends_with, matches)`);
+    result.addError(`${path}[${index}].operator`, `Invalid operator: ${condition.operator}. Must be one of: ${validOperators.join(', ')} or their short forms (eq, ne, gt, ge, lt, le, contains, not_contains, starts_with, ends_with, matches, exists, not_exists)`);
   }
   
   // Check if value is required for this operator
