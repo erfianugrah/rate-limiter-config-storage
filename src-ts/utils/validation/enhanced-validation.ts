@@ -216,11 +216,6 @@ function validateAction(action: RuleAction | any, path: string, result: Validati
     if (action.status && (action.status < 400 || action.status > 599)) {
       result.addError(`${path}.status`, 'Block status must be a valid HTTP error code (400-599)');
     }
-  } else if (action.type === 'rateLimit') {
-    validateField(action, 'limit', 'number', result);
-    if (typeof action.limit === 'number' && action.limit <= 0) {
-      result.addError(`${path}.limit`, 'Rate limit must be greater than 0');
-    }
   }
 }
 

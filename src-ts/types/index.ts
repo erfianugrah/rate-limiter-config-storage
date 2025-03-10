@@ -48,7 +48,7 @@ export interface RuleAction {
   type: string;
   /** Status code for block actions */
   status?: number;
-  /** Throttle limit */
+  /** Throttle limit - now optional for rateLimit actions since it's defined at the rule level */
   limit?: number;
   /** Additional parameters */
   [key: string]: unknown;

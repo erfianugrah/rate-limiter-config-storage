@@ -27,12 +27,13 @@ class Session:
 
 def create_test_rule_1():
     """Create a test rule that matches the existing rule structure"""
+    limit_value = 100
     return {
         "version": 0,
         "name": "Test URL Hostname Rate Limit",
         "description": "Rate limit test for hostname matching",
         "rateLimit": {
-            "limit": 100,
+            "limit": limit_value,
             "period": 60
         },
         "fingerprint": {
@@ -46,12 +47,13 @@ def create_test_rule_1():
             "conditions": [
                 {
                     "field": "url.hostname",
-                    "operator": "eq",
+                    "operator": "equals",
                     "value": "httpbun-nl.erfianugrah.com"
                 }
             ],
             "action": {
-                "type": "rateLimit"
+                "type": "rateLimit",
+                "limit": limit_value
             }
         },
         "elseIfActions": [],
@@ -61,12 +63,13 @@ def create_test_rule_1():
 
 def create_test_rule_2():
     """Create another test rule that matches the existing rule structure"""
+    limit_value = 10
     return {
         "version": 0,
         "name": "Test Bot Protection",
         "description": "Rate limit test for method matching",
         "rateLimit": {
-            "limit": 10,
+            "limit": limit_value,
             "period": 600
         },
         "fingerprint": {
@@ -80,12 +83,13 @@ def create_test_rule_2():
             "conditions": [
                 {
                     "field": "method",
-                    "operator": "eq",
+                    "operator": "equals",
                     "value": "POST"
                 }
             ],
             "action": {
-                "type": "rateLimit"
+                "type": "rateLimit",
+                "limit": limit_value
             }
         },
         "elseIfActions": [],
@@ -95,12 +99,13 @@ def create_test_rule_2():
 
 def create_test_rule_update(rule_id: str, order: int):
     """Create an update for a test rule"""
+    limit_value = 123
     return {
         "version": 1,
         "name": "Test URL Update",
         "description": "Test updating URL rule",
         "rateLimit": {
-            "limit": 123,
+            "limit": limit_value,
             "period": 10
         },
         "fingerprint": {
@@ -118,12 +123,13 @@ def create_test_rule_update(rule_id: str, order: int):
             "conditions": [
                 {
                     "field": "url",
-                    "operator": "starts_with",
+                    "operator": "startsWith",
                     "value": "www"
                 }
             ],
             "action": {
-                "type": "rateLimit"
+                "type": "rateLimit",
+                "limit": limit_value
             }
         },
         "elseIfActions": [],
