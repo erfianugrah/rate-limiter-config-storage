@@ -2,12 +2,30 @@
   "name": "rate-limiter-config-storage",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "deploy": "wrangler deploy",
-    "dev": "wrangler dev",
-    "start": "wrangler dev"
+    "build": "tsc",
+    "deploy": "npm run build && wrangler deploy --config wrangler.jsonc",
+    "deploy:staging": "npm run build && wrangler deploy --config wrangler.jsonc --env staging",
+    "dev": "wrangler dev --config wrangler.jsonc",
+    "start": "wrangler dev --config wrangler.jsonc",
+    "test": "vitest run test-ts",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "check": "tsc --noEmit",
+    "lint": "eslint src-ts --ext .ts",
+    "lint:fix": "eslint src-ts --ext .ts --fix",
+    "clean": "rm -rf dist"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250303.0",
+    "@types/node": "^22.13.10",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "@vitest/coverage-v8": "^3.0.8",
+    "eslint": "^8.57.1",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.8",
     "wrangler": "^3.60.3"
   }
 }

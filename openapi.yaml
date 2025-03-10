@@ -16,41 +16,100 @@ paths:
   /config:
     get:
       summary: Get all rate limiting rules
-      description: Retrieves all currently configured rate limiting rules.
+      description: Retrieves all currently configured rate limiting rules. Supports pagination.
       tags:
         - Rules
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          required: false
+          description: The page number to retrieve (starts at 1)
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+          required: false
+          description: The number of rules per page
       responses:
         '200':
           description: Successful response
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  rules:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Rule'
-              example:
-                rules:
-                  - id: "rule1"
-                    name: "Basic Rate Limit"
-                    description: "Limit requests to 100 per minute"
-                    order: 0
-                    version: 1
-                    rateLimit:
-                      limit: 100
-                      period: 60
-                    fingerprint:
-                      parameters:
-                        - name: "clientIP"
-                    initialMatch:
-                      conditions:
-                        - field: "url"
-                          operator: "contains"
-                          value: "/api/"
-                      action:
-                        type: "rateLimit"
+                oneOf:
+                  - type: object
+                    properties:
+                      rules:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Rule'
+                  - type: object
+                    properties:
+                      rules:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Rule'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+              examples:
+                unpaginated:
+                  value:
+                    rules:
+                      - id: "rule1"
+                        name: "Basic Rate Limit"
+                        description: "Limit requests to 100 per minute"
+                        priority: 0
+                        createdAt: "2023-05-01T12:00:00Z"
+                        updatedAt: "2023-05-01T12:00:00Z"
+                        rateLimit:
+                          limit: 100
+                          period: 60
+                        fingerprint:
+                          parameters:
+                            - "clientIP"
+                        initialMatch:
+                          conditions:
+                            - field: "url"
+                              operator: "contains"
+                              value: "/api/"
+                          action:
+                            type: "block"
+                paginated:
+                  value:
+                    rules:
+                      - id: "rule1"
+                        name: "Basic Rate Limit"
+                        description: "Limit requests to 100 per minute"
+                        priority: 0
+                        createdAt: "2023-05-01T12:00:00Z"
+                        updatedAt: "2023-05-01T12:00:00Z"
+                        rateLimit:
+                          limit: 100
+                          period: 60
+                        fingerprint:
+                          parameters:
+                            - "clientIP"
+                        initialMatch:
+                          conditions:
+                            - field: "url"
+                              operator: "contains"
+                              value: "/api/"
+                          action:
+                            type: "block"
+                    pagination:
+                      currentPage: 1
+                      pageSize: 10
+                      totalItems: 25
+                      totalPages: 3
+                      hasNextPage: true
+                      hasPrevPage: false
         '500':
           $ref: '#/components/responses/InternalServerError'
     post:
@@ -304,7 +363,7 @@ paths:
   /rules/{ruleId}/versions:
     get:
       summary: Get version history for a rule
-      description: Retrieves the version history of a specific rule.
+      description: Retrieves the version history of a specific rule. Supports pagination.
       tags:
         - Rules
         - Versions
@@ -315,30 +374,124 @@ paths:
           schema:
             type: string
           description: The ID of the rule to get version history for
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          required: false
+          description: The page number to retrieve (starts at 1)
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+          required: false
+          description: The number of versions per page
       responses:
         '200':
           description: Successful response
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  versions:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Version'
-              example:
-                versions:
-                  - version: 1
-                    timestamp: "2023-05-01T12:00:00Z"
-                    changes: ["Initial version"]
-                    data:
-                      # Rule data at version 1
-                  - version: 2
-                    timestamp: "2023-05-02T14:30:00Z"
-                    changes: ["Updated rate limit"]
-                    data:
-                      # Updated rule data at version 2
+                oneOf:
+                  - type: object
+                    properties:
+                      versions:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Version'
+                  - type: object
+                    properties:
+                      versions:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Version'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+              examples:
+                unpaginated:
+                  value:
+                    versions:
+                      - versionId: "v1-123abc"
+                        timestamp: "2023-05-01T12:00:00Z"
+                        rule:
+                          id: "rule1"
+                          name: "Basic Rate Limit"
+                          description: "Limit requests to 100 per minute"
+                          priority: 0
+                          createdAt: "2023-05-01T12:00:00Z"
+                          updatedAt: "2023-05-01T12:00:00Z"
+                          rateLimit:
+                            limit: 100
+                            period: 60
+                          fingerprint:
+                            parameters:
+                              - "clientIP"
+                          initialMatch:
+                            conditions:
+                              - field: "url"
+                                operator: "contains"
+                                value: "/api/"
+                            action:
+                              type: "block"
+                      - versionId: "v2-456def"
+                        timestamp: "2023-05-02T14:30:00Z"
+                        rule:
+                          id: "rule1"
+                          name: "Basic Rate Limit"
+                          description: "Limit requests to 100 per minute (updated)"
+                          priority: 0
+                          createdAt: "2023-05-01T12:00:00Z"
+                          updatedAt: "2023-05-02T14:30:00Z"
+                          rateLimit:
+                            limit: 120
+                            period: 60
+                          fingerprint:
+                            parameters:
+                              - "clientIP"
+                          initialMatch:
+                            conditions:
+                              - field: "url"
+                                operator: "contains"
+                                value: "/api/"
+                            action:
+                              type: "block"
+                paginated:
+                  value:
+                    versions:
+                      - versionId: "v1-123abc"
+                        timestamp: "2023-05-01T12:00:00Z"
+                        rule:
+                          id: "rule1"
+                          name: "Basic Rate Limit"
+                          description: "Limit requests to 100 per minute"
+                          priority: 0
+                          createdAt: "2023-05-01T12:00:00Z"
+                          updatedAt: "2023-05-01T12:00:00Z"
+                          rateLimit:
+                            limit: 100
+                            period: 60
+                          fingerprint:
+                            parameters:
+                              - "clientIP"
+                          initialMatch:
+                            conditions:
+                              - field: "url"
+                                operator: "contains"
+                                value: "/api/"
+                            action:
+                              type: "block"
+                    pagination:
+                      currentPage: 1
+                      pageSize: 10
+                      totalItems: 15
+                      totalPages: 2
+                      hasNextPage: true
+                      hasPrevPage: false
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
@@ -381,6 +534,25 @@ paths:
                 reset: 1620000000
                 resetFormatted: "Mon, 03 May 2021 00:00:00 GMT"
                 period: 3600
+
+  /export:
+    get:
+      summary: Export all configuration data
+      description: |
+        Exports the entire configuration including all rules and their version history.
+        Returns a JSON file attachment with the complete backup data.
+      tags:
+        - Utility
+        - Backup
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackupData'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
 components:
   schemas:
@@ -600,26 +772,103 @@ components:
     Version:
       type: object
       required:
-        - version
+        - versionId
         - timestamp
-        - changes
-        - data
+        - rule
       properties:
-        version:
-          type: integer
-          description: The version number
+        versionId:
+          type: string
+          description: The unique identifier for this version
         timestamp:
           type: string
           format: date-time
           description: The timestamp when this version was created
-        changes:
-          type: array
-          items:
-            type: string
-          description: A list of changes made in this version
-        data:
+        rule:
           $ref: '#/components/schemas/Rule'
           description: The full rule data for this version
+          
+    Pagination:
+      type: object
+      required:
+        - currentPage
+        - pageSize
+        - totalItems
+        - totalPages
+        - hasNextPage
+        - hasPrevPage
+      properties:
+        currentPage:
+          type: integer
+          description: The current page number (1-based)
+        pageSize:
+          type: integer
+          description: The number of items per page
+        totalItems:
+          type: integer
+          description: The total number of items across all pages
+        totalPages:
+          type: integer
+          description: The total number of pages
+        hasNextPage:
+          type: boolean
+          description: Whether there is a next page available
+        hasPrevPage:
+          type: boolean
+          description: Whether there is a previous page available
+          
+    BackupData:
+      type: object
+      required:
+        - timestamp
+        - metadata
+        - config
+        - versions
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: The timestamp when the backup was created
+        metadata:
+          type: object
+          required:
+            - version
+            - environment
+            - ruleCount
+            - versionCount
+          properties:
+            version:
+              type: string
+              description: The version format of the backup
+            environment:
+              type: string
+              description: The environment the backup was taken from
+            ruleCount:
+              type: integer
+              description: The number of rules in the backup
+            versionCount:
+              type: integer
+              description: The total number of rule versions in the backup
+        config:
+          $ref: '#/components/schemas/Config'
+          description: The configuration data containing all rules
+        versions:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Version'
+          description: Rule versions keyed by rule ID
+          
+    Config:
+      type: object
+      required:
+        - rules
+      properties:
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/Rule'
+          description: Array of all rate limiting rules
 
     RequestExample:
       type: object
@@ -723,6 +972,8 @@ tags:
     description: Operations for managing rule versions
   - name: Utility
     description: Utility operations for the rate limiting system
+  - name: Backup
+    description: Operations for exporting and backing up the configuration
 
 x-implementation-notes: |
   - The rate limiting logic is implemented using a sliding window algorithm.
@@ -733,10 +984,15 @@ x-implementation-notes: |
   - Changes to rules are versioned, allowing for easy rollback if needed.
   - The worker supports custom responses, allowing for flexible handling of rate-limited requests.
 
+x-enhancements:
+  - Added pagination support for rule listing and version history endpoints.
+  - Added configuration export feature for backing up all rules and their versions.
+  - Improved type safety with full TypeScript implementation.
+  
 x-future-enhancements:
   - Implement authentication for the configuration API to enhance security.
   - Add support for more complex rate limiting scenarios, such as tiered limits.
   - Implement caching mechanisms to reduce Durable Object reads for frequently accessed rules.
-  - Add support for importing and exporting rule configurations.
+  - Add support for importing rule configurations from backup files.
   - Develop a user interface for easier management of rate limiting rules.
   - Implement analytics and reporting features for rate limiting activities.

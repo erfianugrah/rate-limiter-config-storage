@@ -1,28 +1,44 @@
 #:schema node_modules/wrangler/config-schema.json
 name = "rate-limiter-config-storage"
-main = "src/index.js"
+main = "dist/index.js" # Updated to use TypeScript output
 compatibility_date = "2024-09-25"
 
 account_id = "25f21f141824546aa72c74451a11b419"
-route = { pattern = "api.rate-limiter.erfianugrah.com", custom_domain = true, zone_id = "3f2c4daa43d5920f313654a873b31d06" }
 workers_dev = true
 
-[observability]
-enabled = true
+[build]
+command = "npm run build"
 
 [placement]
 mode = "smart"
 
-[[queues.producers]]
+[observability]
+enabled = true
+
+# Production environment (default)
+[env.production]
+route = { pattern = "api.rate-limiter.erfianugrah.com", custom_domain = true, zone_id = "3f2c4daa43d5920f313654a873b31d06" }
+
+[[env.production.queues.producers]]
 binding = "CONFIG_QUEUE"
 queue = "config-update-queue"
 
+# Staging environment
+[env.staging]
+name = "rate-limiter-config-storage-staging"
+route = { pattern = "api-staging.rate-limiter.erfianugrah.com", custom_domain = true, zone_id = "3f2c4daa43d5920f313654a873b31d06" }
+
+[[env.staging.queues.producers]]
+binding = "CONFIG_QUEUE"
+queue = "config-update-queue-staging"
+
+# Durable Objects configuration
 [durable_objects]
 bindings = [
-	{ name = "CONFIG_STORAGE", class_name = "ConfigStorage" }
+  { name = "CONFIG_STORAGE", class_name = "ConfigStorage" }
 ]
-# Durable Object migrations.
-# Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#migrations
+
+# Durable Object migrations
 [[migrations]]
 tag = "v1"
 new_classes = ["ConfigStorage"]
