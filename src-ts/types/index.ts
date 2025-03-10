@@ -8,9 +8,9 @@
 export enum ActionType {
   BLOCK = 'block',
   ALLOW = 'allow',
-  THROTTLE = 'throttle',
   LOG = 'log',
   CHALLENGE = 'challenge',
+  RATE_LIMIT = 'rateLimit',
 }
 
 /**

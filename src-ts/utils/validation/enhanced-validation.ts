@@ -205,7 +205,7 @@ function validateAction(action: RuleAction | any, path: string, result: Validati
   validateField(action, 'type', 'string', result);
   
   // Validate action type
-  const validTypes = ['block', 'allow', 'throttle', 'challenge', 'log'];
+  const validTypes = ['block', 'allow', 'challenge', 'log', 'rateLimit'];
   if (action.type && !validTypes.includes(action.type)) {
     result.addError(`${path}.type`, `Invalid action type: ${action.type}. Must be one of: ${validTypes.join(', ')}`);
   }
@@ -216,10 +216,10 @@ function validateAction(action: RuleAction | any, path: string, result: Validati
     if (action.status && (action.status < 400 || action.status > 599)) {
       result.addError(`${path}.status`, 'Block status must be a valid HTTP error code (400-599)');
     }
-  } else if (action.type === 'throttle') {
+  } else if (action.type === 'rateLimit') {
     validateField(action, 'limit', 'number', result);
     if (typeof action.limit === 'number' && action.limit <= 0) {
-      result.addError(`${path}.limit`, 'Throttle limit must be greater than 0');
+      result.addError(`${path}.limit`, 'Rate limit must be greater than 0');
     }
   }
 }
