@@ -135,10 +135,10 @@ function validateFingerprint(fingerprint: Fingerprint | any, result: ValidationR
     result.addWarning('fingerprint.parameters', 'Fingerprint has no parameters, rule will apply to all requests');
   }
   
-  // Check each parameter
+  // Check each parameter - allow both strings and objects with 'name' property
   fingerprint.parameters.forEach((param: any, index: number) => {
-    if (typeof param !== 'string') {
-      result.addError(`fingerprint.parameters[${index}]`, 'Fingerprint parameter must be a string');
+    if (typeof param !== 'string' && (typeof param !== 'object' || !param || typeof param.name !== 'string')) {
+      result.addError(`fingerprint.parameters[${index}]`, 'Fingerprint parameter must be a string or an object with a name property');
     }
   });
 }

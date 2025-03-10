@@ -77,11 +77,31 @@ export interface RateLimit {
 }
 
 /**
+ * Represents a fingerprint parameter
+ */
+export interface FingerprintParameter {
+  /** The name of the parameter */
+  name: string;
+  /** Optional header name */
+  headerName?: string;
+  /** Optional header value */
+  headerValue?: string;
+  /** Optional cookie name */
+  cookieName?: string;
+  /** Optional cookie value */
+  cookieValue?: string;
+  /** Optional body field */
+  bodyField?: string;
+  /** Optional body field name */
+  bodyFieldName?: string;
+}
+
+/**
  * Represents fingerprint settings
  */
 export interface Fingerprint {
   /** The parameters to use for fingerprinting */
-  parameters: string[];
+  parameters: (string | FingerprintParameter)[];
 }
 
 /**
