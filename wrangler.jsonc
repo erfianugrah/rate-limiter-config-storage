@@ -51,6 +51,11 @@
             "queue": "config-update-queue-staging"
           }
         ]
+      },
+      "durable_objects": {
+        "bindings": [
+          { "name": "CONFIG_STORAGE", "class_name": "ConfigStorage" }
+        ]
       }
     }
   },

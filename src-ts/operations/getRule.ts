@@ -59,10 +59,16 @@ export async function getRuleVersions(
   try {
     logger.info('Getting rule versions', { ruleId });
     
-    const versions = await configService.getRuleVersions(ruleId);
+    const versionsData = await configService.getRuleVersions(ruleId);
+    
+    // Handle both array and paginated response formats
+    const versions = 'versions' in versionsData ? versionsData.versions : versionsData;
     
     if (versions.length > 0) {
-      return new Response(JSON.stringify({ versions }), {
+      return new Response(JSON.stringify({ 
+        versions,
+        pagination: 'pagination' in versionsData ? versionsData.pagination : undefined 
+      }), {
         headers: JSON_CONTENT_TYPE
       });
     }

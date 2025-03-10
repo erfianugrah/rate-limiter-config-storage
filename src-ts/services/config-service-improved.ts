@@ -6,7 +6,7 @@
 import { DEFAULT_ENVIRONMENT, CACHE_TTL, VERSION_LIMIT } from '../constants/index.js';
 import { logger, trackPerformance } from '../utils/index.js';
 import { validateRule, validateRules, logValidationResult } from '../utils/validation/enhanced-validation.js';
-import { Rule, RuleVersion, DurableObjectState, Environment } from '../types/index.js';
+import { Rule, RuleVersion, DurableObjectState, Environment, PaginationParams, PaginatedRules, PaginationMeta, PaginatedVersions } from '../types/index.js';
 
 // Constants for storage keys
 const RULE_PREFIX = 'rule_';
@@ -239,7 +239,7 @@ export class ConfigService {
                 
                 // If not found in direct storage or cache, check full config
                 const config = await this.getConfig();
-                const rule = config.rules.find(r => r.id === ruleId);
+                const rule = config.rules.find((r: Rule) => r.id === ruleId);
                 
                 if (rule) {
                     logger.debug('Rule found in full config', { ruleId });
@@ -600,8 +600,9 @@ export class ConfigService {
                 logger.info('Reverting rule', { ruleId, versionId });
                 
                 // Get rule versions
-                const versions = await this.getRuleVersions(ruleId);
-                const version = versions.find(v => v.versionId === versionId);
+                const versionsData = await this.getRuleVersions(ruleId);
+                const versions = Array.isArray(versionsData) ? versionsData : versionsData.versions;
+                const version = versions.find((v: RuleVersion) => v.versionId === versionId);
                 
                 if (!version) {
                     logger.warn('Version not found for revert', { ruleId, versionId });
@@ -690,7 +691,9 @@ export class ConfigService {
                 logger.info('Archiving rule version', { ruleId });
                 
                 // Get existing versions
-                const versions = await this.getRuleVersions(ruleId);
+                const versionsData = await this.getRuleVersions(ruleId);
+                // Ensure we have an array to work with
+                const versionArr = Array.isArray(versionsData) ? versionsData : versionsData.versions;
                 
                 // Create new version object
                 const newVersion: RuleVersion = {
@@ -700,13 +703,13 @@ export class ConfigService {
                 };
                 
                 // Add to versions and maintain max limit
-                versions.unshift(newVersion);
-                if (versions.length > VERSION_LIMIT) {
-                    versions.splice(VERSION_LIMIT);
+                versionArr.unshift(newVersion);
+                if (versionArr.length > VERSION_LIMIT) {
+                    versionArr.splice(VERSION_LIMIT);
                 }
                 
                 // Save updated versions
-                await this.state.storage.put(`${VERSION_PREFIX}${ruleId}`, JSON.stringify(versions));
+                await this.state.storage.put(`${VERSION_PREFIX}${ruleId}`, JSON.stringify(versionArr));
                 
                 logger.info('Rule version archived', { ruleId, versionId: newVersion.versionId });
             } catch (error) {
