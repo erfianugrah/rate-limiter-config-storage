@@ -183,7 +183,13 @@ function validateCondition(
   };
   
   // Allow both long form and short form operators
+  // First, normalize the operator
   const normalizedOperator = shortFormMap[condition.operator] || condition.operator;
+  
+  // Update the operator to the normalized form for later processing
+  if (shortFormMap[condition.operator]) {
+    condition.operator = normalizedOperator;
+  }
   
   if (condition.operator && !validOperators.includes(normalizedOperator)) {
     result.addError(`${path}[${index}].operator`, `Invalid operator: ${condition.operator}. Must be one of: ${validOperators.join(', ')} or their short forms (eq, ne, contains, not_contains, starts_with, ends_with, matches)`);
@@ -191,14 +197,13 @@ function validateCondition(
   
   // Check if value is required for this operator
   const valueRequiredOperators = ['equals', 'notEquals', 'contains', 'notContains', 'startsWith', 'endsWith', 'matches', 'greaterThan', 'greaterThanEqual', 'lessThan', 'lessThanEqual'];
-  const shortFormRequiredOperators = ['eq', 'ne', 'contains', 'not_contains', 'starts_with', 'ends_with', 'matches', 'gt', 'ge', 'lt', 'le'];
   
-  if ((valueRequiredOperators.includes(normalizedOperator) || shortFormRequiredOperators.includes(condition.operator)) && !('value' in condition)) {
+  if (valueRequiredOperators.includes(normalizedOperator) && !('value' in condition)) {
     result.addError(`${path}[${index}].value`, `Value is required for operator: ${condition.operator}`);
   }
   
   // Special validation for regex pattern
-  if (condition.operator === 'matches' && condition.value) {
+  if ((condition.operator === 'matches' || normalizedOperator === 'matches') && condition.value) {
     try {
       new RegExp(condition.value);
     } catch (error) {
