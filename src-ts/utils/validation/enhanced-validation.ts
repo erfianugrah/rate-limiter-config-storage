@@ -167,14 +167,33 @@ function validateCondition(
   validateField(condition, 'value', 'string', result, false);
   
   // Validate operator
-  const validOperators = ['equals', 'notEquals', 'contains', 'notContains', 'startsWith', 'endsWith', 'matches', 'exists', 'notExists'];
-  if (condition.operator && !validOperators.includes(condition.operator)) {
-    result.addError(`${path}[${index}].operator`, `Invalid operator: ${condition.operator}. Must be one of: ${validOperators.join(', ')}`);
+  const validOperators = ['equals', 'notEquals', 'contains', 'notContains', 'startsWith', 'endsWith', 'matches', 'exists', 'notExists', 'greaterThan', 'greaterThanEqual', 'lessThan', 'lessThanEqual'];
+  const shortFormMap: Record<string, string> = {
+    'eq': 'equals',
+    'ne': 'notEquals',
+    'gt': 'greaterThan',
+    'ge': 'greaterThanEqual',
+    'lt': 'lessThan',
+    'le': 'lessThanEqual',
+    'contains': 'contains',
+    'not_contains': 'notContains',
+    'starts_with': 'startsWith',
+    'ends_with': 'endsWith',
+    'matches': 'matches'
+  };
+  
+  // Allow both long form and short form operators
+  const normalizedOperator = shortFormMap[condition.operator] || condition.operator;
+  
+  if (condition.operator && !validOperators.includes(normalizedOperator)) {
+    result.addError(`${path}[${index}].operator`, `Invalid operator: ${condition.operator}. Must be one of: ${validOperators.join(', ')} or their short forms (eq, ne, contains, not_contains, starts_with, ends_with, matches)`);
   }
   
   // Check if value is required for this operator
-  const valueRequiredOperators = ['equals', 'notEquals', 'contains', 'notContains', 'startsWith', 'endsWith', 'matches'];
-  if (valueRequiredOperators.includes(condition.operator) && !('value' in condition)) {
+  const valueRequiredOperators = ['equals', 'notEquals', 'contains', 'notContains', 'startsWith', 'endsWith', 'matches', 'greaterThan', 'greaterThanEqual', 'lessThan', 'lessThanEqual'];
+  const shortFormRequiredOperators = ['eq', 'ne', 'contains', 'not_contains', 'starts_with', 'ends_with', 'matches', 'gt', 'ge', 'lt', 'le'];
+  
+  if ((valueRequiredOperators.includes(normalizedOperator) || shortFormRequiredOperators.includes(condition.operator)) && !('value' in condition)) {
     result.addError(`${path}[${index}].value`, `Value is required for operator: ${condition.operator}`);
   }
   
