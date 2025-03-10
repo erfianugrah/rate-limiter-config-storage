@@ -168,6 +168,7 @@ function validateCondition(
   
   // Validate operator
   const validOperators = ['equals', 'notEquals', 'contains', 'notContains', 'startsWith', 'endsWith', 'matches', 'exists', 'notExists', 'greaterThan', 'greaterThanEqual', 'lessThan', 'lessThanEqual'];
+  // Map of short form operators to their long form equivalents
   const shortFormMap: Record<string, string> = {
     'eq': 'equals',
     'ne': 'notEquals',
@@ -186,13 +187,16 @@ function validateCondition(
   // First, normalize the operator
   const normalizedOperator = shortFormMap[condition.operator] || condition.operator;
   
+  // Log the operator normalization process
+  logger.debug(`Operator normalization: original=${condition.operator}, normalized=${normalizedOperator}, valid=${validOperators.includes(normalizedOperator)}`);
+  
   // Update the operator to the normalized form for later processing
   if (shortFormMap[condition.operator]) {
     condition.operator = normalizedOperator;
   }
   
   if (condition.operator && !validOperators.includes(normalizedOperator)) {
-    result.addError(`${path}[${index}].operator`, `Invalid operator: ${condition.operator}. Must be one of: ${validOperators.join(', ')} or their short forms (eq, ne, contains, not_contains, starts_with, ends_with, matches)`);
+    result.addError(`${path}[${index}].operator`, `Invalid operator: ${condition.operator}. Must be one of: ${validOperators.join(', ')} or their short forms (eq, ne, gt, ge, lt, le, contains, not_contains, starts_with, ends_with, matches)`);
   }
   
   // Check if value is required for this operator

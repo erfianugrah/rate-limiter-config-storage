@@ -1,0 +1,31 @@
+{
+  "id": "beb1f015-8a9e-4473-8d60-5372b925a68a",
+  "order": 0,
+  "version": 0,
+  "name": "httpbun",
+  "description": "",
+  "rateLimit": {
+    "limit": 1,
+    "period": 10
+  },
+  "fingerprint": {
+    "parameters": [
+      {
+        "name": "url.hostname"
+      }
+    ]
+  },
+  "initialMatch": {
+    "conditions": [
+      {
+        "field": "url.hostname",
+        "operator": "eq",
+        "value": "httpbun.erfianugrah.com"
+      }
+    ],
+    "action": {
+      "type": "rateLimit"
+    }
+  },
+  "elseIfActions": []
+}
