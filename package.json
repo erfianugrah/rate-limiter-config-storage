@@ -5,8 +5,8 @@
 	"type": "module",
 	"scripts": {
 		"build": "tsc",
-		"deploy": "npm run build && wrangler deploy",
-		"deploy:staging": "npm run build && wrangler deploy--env staging",
+		"deploy": "npm run build && wrangler deploy --env production",
+		"deploy:staging": "npm run build && wrangler deploy --env staging",
 		"dev": "wrangler dev",
 		"start": "wrangler dev",
 		"test": "vitest run test-ts",
